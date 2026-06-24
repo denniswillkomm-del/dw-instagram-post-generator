@@ -2,7 +2,7 @@
 
 Karussell-Posts im DW-Stil (1080×1350, Instagram 4:5) – komplett im Browser, kein Server.
 
-**Live:** _(GitHub-Pages-URL wird nach dem ersten Deploy hier eingetragen)_
+**Live:** https://denniswillkomm-del.github.io/dw-instagram-post-generator/
 
 ## Nutzung
 - `index.html` öffnen (lokal per Doppelklick **oder** über die GitHub-Pages-URL überall).
