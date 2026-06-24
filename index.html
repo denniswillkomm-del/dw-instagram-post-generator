@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DW Instagram-Post-Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="templates.js"></script>
+<style>
+  :root{
+    --bg:#1B0739;
+    --panel:#241046;
+    --panel2:#2d1556;
+    --line:#3c2168;
+    --text:#ece7f5;
+    --muted:#a99fc4;
+    --teal:#3aa9b5;
+    --c1:#4CB7F5; --c2:#6D68F0; --c3:#C65ACB;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:#140529;color:var(--text);display:flex;height:100vh;overflow:hidden;
+  }
+  /* ---- Left editor panel ---- */
+  #editor{width:430px;min-width:430px;height:100%;overflow-y:auto;background:var(--panel);
+    border-right:1px solid var(--line);padding:18px 18px 60px;}
+  #editor h1{font-size:17px;margin:0 0 2px;font-weight:600;letter-spacing:.3px;}
+  #editor .sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5;}
+  .group{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px;}
+  .group h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:0 0 10px;font-weight:600;}
+  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;}
+  textarea,input[type=text],select{width:100%;background:#1a0b33;border:1px solid var(--line);
+    color:var(--text);border-radius:8px;padding:9px 10px;font-size:13px;font-family:inherit;resize:vertical;}
+  textarea{min-height:140px;line-height:1.5;}
+  input[type=range]{width:100%;}
+  .row{display:flex;gap:8px;}
+  .row>*{flex:1;}
+  .rangewrap{display:flex;align-items:center;gap:8px;}
+  .rangewrap output{font-size:12px;color:var(--text);min-width:34px;text-align:right;}
+  button{cursor:pointer;border:none;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;
+    font-family:inherit;background:var(--line);color:var(--text);transition:.15s;}
+  button:hover{filter:brightness(1.2);}
+  button.primary{background:linear-gradient(90deg,var(--c1),var(--c3));color:#fff;}
+  button.ghost{background:transparent;border:1px solid var(--line);}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .btnrow button{flex:1;min-width:90px;}
+  /* slide tabs */
+  #tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+  .tab{padding:6px 11px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);
+    font-size:12px;cursor:pointer;position:relative;}
+  .tab.active{background:linear-gradient(90deg,var(--c1),var(--c3));border-color:transparent;color:#fff;font-weight:600;}
+  .tab .x{margin-left:6px;opacity:.6;}
+  .tab .x:hover{opacity:1;}
+  .hint{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5;}
+  .swatch{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:middle;margin-right:4px;}
+  /* ---- Right preview ---- */
+  #stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:24px;overflow:auto;background:radial-gradient(circle at 50% 30%,#1d0a3d,#140529);}
+  #canvasWrap{box-shadow:0 18px 60px rgba(0,0,0,.55);border-radius:6px;overflow:hidden;}
+  canvas#preview{display:block;width:432px;height:540px;}
+  #stageBar{margin-top:18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;}
+  #stageBar .meta{font-size:12px;color:var(--muted);}
+  .toggle{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:10px 0;}
+  .toggle input{width:auto;}
+</style>
+</head>
+<body>
+  <div id="editor">
+    <h1>DW Post-Generator</h1>
+    <div class="sub">Karussell-Posts im DW-Stil. Text mit Zeilenumbrüchen eingeben, leere Zeile = Absatz-Abstand. Schlüsselwörter mit *Sternchen* markieren → Verlauf-Highlight.</div>
+
+    <div id="tabs"></div>
+    <div class="btnrow" style="margin-bottom:14px;">
+      <button class="ghost" onclick="addSlide('content')">+ Inhalt</button>
+      <button class="ghost" onclick="addSlide('intro')">+ Profil</button>
+      <button class="ghost" onclick="addSlide('cta')">+ Abschluss</button>
+    </div>
+
+    <div class="group">
+      <h2>Vorlagen & Projekte</h2>
+      <label>Neues Projekt aus Vorlage</label>
+      <div class="row">
+        <select id="templateSel"></select>
+        <button class="ghost" style="flex:0 0 auto;" onclick="loadTemplate()">Laden</button>
+      </div>
+      <div class="hint">Ersetzt das aktuelle Projekt. Vorher ggf. unten speichern.</div>
+      <label style="margin-top:12px;">Meine Projekte (nur dieser Browser)</label>
+      <div class="row">
+        <select id="projSel"></select>
+        <button class="ghost" style="flex:0 0 auto;" onclick="loadLocalProject()">Laden</button>
+      </div>
+      <div class="btnrow">
+        <button class="ghost" onclick="saveLocalProject()">Speichern als…</button>
+        <button class="ghost" onclick="deleteLocalProject()">Löschen</button>
+      </div>
+      <div class="hint">Gespeichert wird nur in diesem Browser (kein Geräte-Sync). Für überall: unten „Projekt speichern“ als JSON.</div>
+    </div>
+
+    <div class="group">
+      <h2>Slide-Inhalt</h2>
+      <div id="fields"></div>
+    </div>
+
+    <div class="group">
+      <h2>Typografie</h2>
+      <label>Schriftart</label>
+      <select id="font">
+        <option value="'Cormorant Garamond', serif">Cormorant Garamond (elegant)</option>
+        <option value="'EB Garamond', serif">EB Garamond (klassisch)</option>
+        <option value="'Playfair Display', serif">Playfair Display (kontrastreich)</option>
+      </select>
+      <label>Schriftgröße <span id="fsVal" style="color:var(--text)"></span></label>
+      <div class="rangewrap"><input type="range" id="fontSize" min="34" max="78" step="1"><output id="fsOut"></output></div>
+      <label>Zeilenabstand</label>
+      <div class="rangewrap"><input type="range" id="lineH" min="1.1" max="1.7" step="0.01"><output id="lhOut"></output></div>
+    </div>
+
+    <div class="group">
+      <h2>Elemente</h2>
+      <div class="toggle"><input type="checkbox" id="showBar" checked><label for="showBar" style="margin:0;color:var(--text)">Verlauf-Balken links</label></div>
+      <div class="toggle"><input type="checkbox" id="showSwipe" checked><label for="showSwipe" style="margin:0;color:var(--text)">Swipe-Pfeil (Pill)</label></div>
+      <div class="toggle"><input type="checkbox" id="showQ"><label for="showQ" style="margin:0;color:var(--text)">Fragezeichen-Deko (für Abschluss)</label></div>
+      <div id="uploadIntro">
+        <label>Profilfoto für Profil-Slide (Hexagon)</label>
+        <input type="file" id="photo" accept="image/*">
+      </div>
+      <div id="uploadCta">
+        <label>Original-Logo für Abschluss-Slide (sonst DW-Hexagon gezeichnet)</label>
+        <input type="file" id="logo" accept="image/*">
+        <div class="hint" id="logoStatus">Noch kein Logo geladen.</div>
+        <button class="ghost" id="logoClear" style="margin-top:6px;width:100%;">Logo entfernen</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Caption (Instagram-Text)</h2>
+      <textarea id="caption" placeholder="Bildunterschrift / Post-Text … wird mit dem Projekt gespeichert (JSON + Browser), aber nicht aufs Bild gerendert."></textarea>
+      <div class="btnrow">
+        <button class="ghost" onclick="copyCaption()">Caption kopieren</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <h2>Export & Speichern</h2>
+      <div class="btnrow">
+        <button class="primary" onclick="exportCurrent()">PNG: diese Slide</button>
+        <button class="primary" onclick="exportAll()">PNG: alle</button>
+      </div>
+      <div class="btnrow">
+        <button class="ghost" onclick="saveJSON()">Projekt speichern</button>
+        <button class="ghost" onclick="document.getElementById('loadFile').click()">Projekt laden</button>
+        <input type="file" id="loadFile" accept="application/json" style="display:none">
+      </div>
+      <label>Projekt per Paste einfügen (JSON hier reinkopieren)</label>
+      <textarea id="pasteBox" placeholder='{ "slides": [ … ] }  — hier einfügen und „Aus Feld laden" drücken' style="min-height:90px;font-family:ui-monospace,Menlo,monospace;font-size:12px;"></textarea>
+      <div class="btnrow">
+        <button class="primary" onclick="loadFromPaste()">Aus Feld laden</button>
+        <button class="ghost" onclick="copyProject()">Projekt-Text kopieren</button>
+      </div>
+      <div class="hint">PNG-Export: 1080×1350 px (Instagram 4:5). „Alle" lädt jede Slide einzeln herunter.</div>
+    </div>
+
+    <div class="hint" style="margin-top:6px;">
+      <span class="swatch" style="background:#1B0739"></span>BG #1B0739 &nbsp;
+      <span class="swatch" style="background:linear-gradient(90deg,#4CB7F5,#C65ACB)"></span>Verlauf #4CB7F5→#6D68F0→#C65ACB &nbsp;
+      <span class="swatch" style="background:#3aa9b5"></span>Teal #3AA9B5
+    </div>
+  </div>
+
+  <div id="stage">
+    <div id="canvasWrap"><canvas id="preview" width="1080" height="1350"></canvas></div>
+    <div id="stageBar">
+      <span class="meta" id="meta"></span>
+    </div>
+  </div>
+
+<script>
+// ============ DESIGN TOKENS ============
+const T = {
+  W:1080, H:1350,
+  bg:'#1B0739',
+  text:'#F1ECF8',
+  grad:[ [0.0,'#4CB7F5'],[0.5,'#6D68F0'],[1.0,'#C65ACB'] ],
+  teal:'#3AA9B5',
+  bar:{x:88,w:16,y0:315,y1:893,r:8},
+  pill:{x:792,y:1198,w:198,h:84,r:42},
+  margin:108,            // left text inset (text block is centered though)
+  textCenterX:540,
+};
+function gradStops(ctx,x0,x1,stops){
+  const g=ctx.createLinearGradient(x0,0,x1,0);
+  stops.forEach(s=>g.addColorStop(s[0],s[1]));
+  return g;
+}
+function gradStopsV(ctx,y0,y1,stops){
+  const g=ctx.createLinearGradient(0,y0,0,y1);
+  stops.forEach(s=>g.addColorStop(s[0],s[1]));
+  return g;
+}
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+// ============ STATE ============
+let state = {
+  font:"'Cormorant Garamond', serif",
+  fontSize:56,
+  lineH:1.34,
+  showBar:true, showSwipe:true, showQ:false,
+  caption:'',
+  slides:[],
+  active:0,
+  photo:null, logo:null,
+};
+
+function defaultSlide(type){
+  if(type==='content') return {type:'content', text:"Ich war mir *sicher*\nwie das Gespräch gelaufen war.\n\nMein Gegenüber auch.\nNur völlig anders."};
+  if(type==='intro') return {type:'intro', heading:"Ich bin *Dennis*", text:"Ich arbeite mit Menschen an\nden Stellen, an denen ein\nProblem keine bessere\nLösung mehr verlangt…\n\n… sondern eine andere\nSicht auf sich selbst."};
+  if(type==='cta') return {type:'cta', text:"Bei welchem Thema bist du\ndir gerade so *sicher*,\ndass du deine\neigene Sicht\nkaum noch bemerkst?", footer:"Folge mir für mehr Gedanken über Muster,\nEntwicklung und neue Sichtweisen."};
+}
+
+// ============ TEXT PARSING ============
+// returns array of paragraphs; each paragraph = array of lines; each line = array of {t,hl}
+function parseText(txt){
+  const paras = txt.replace(/\r/g,'').split(/\n\s*\n/);
+  return paras.map(p=>p.split('\n').map(line=>{
+    // split into tokens preserving spaces, mark *word* as highlight
+    const parts=[]; const re=/\*([^*]+)\*/g; let last=0,m;
+    while((m=re.exec(line))){
+      if(m.index>last) parts.push({t:line.slice(last,m.index),hl:false});
+      parts.push({t:m[1],hl:true});
+      last=re.lastIndex;
+    }
+    if(last<line.length) parts.push({t:line.slice(last),hl:false});
+    if(parts.length===0) parts.push({t:'',hl:false});
+    return parts;
+  }));
+}
+
+// ============ RENDERER ============
+const canvas=document.getElementById('preview');
+const ctx=canvas.getContext('2d');
+
+function drawBar(ctx){
+  if(!state.showBar) return;
+  const b=T.bar;
+  ctx.fillStyle=gradStopsV(ctx,b.y0,b.y1,T.grad);
+  roundRect(ctx,b.x,b.y0,b.w,b.y1-b.y0,b.r);
+  ctx.fill();
+}
+function drawSwipe(ctx){
+  if(!state.showSwipe) return;
+  const p=T.pill;
+  ctx.lineWidth=4;
+  ctx.strokeStyle=T.teal;
+  roundRect(ctx,p.x,p.y,p.w,p.h,p.r);
+  ctx.stroke();
+  // 4 chevrons
+  const cy=p.y+p.h/2;
+  ctx.strokeStyle=T.teal;ctx.lineWidth=8;ctx.lineCap='round';ctx.lineJoin='round';
+  const startX=p.x+p.w/2-46, gap=24, ch=16;
+  for(let i=0;i<4;i++){
+    const x=startX+i*gap;
+    ctx.beginPath();
+    ctx.moveTo(x,cy-ch/2);
+    ctx.lineTo(x+ch*0.7,cy);
+    ctx.lineTo(x,cy+ch/2);
+    ctx.stroke();
+  }
+}
+
+// draw centered multi-line text block, returns total height; if measureOnly, doesn't draw
+function drawTextBlock(ctx, paragraphs, cx, topY, fontPx, lineH, paraGap, opts={}){
+  const lh=fontPx*lineH;
+  ctx.textBaseline='alphabetic';
+  ctx.textAlign='left';
+  let y=topY+fontPx; // baseline of first line
+  paragraphs.forEach((para,pi)=>{
+    para.forEach(line=>{
+      // measure full line width
+      ctx.font=`${opts.weight||500} ${fontPx}px ${state.font}`;
+      let total=0;
+      line.forEach(tok=> total+=ctx.measureText(tok.t).width);
+      let x=cx-total/2;
+      line.forEach(tok=>{
+        const w=ctx.measureText(tok.t).width;
+        if(!opts.measureOnly){
+          if(tok.hl){
+            ctx.fillStyle=gradStops(ctx,x,x+w,T.grad);
+          } else {
+            ctx.fillStyle=opts.color||T.text;
+          }
+          ctx.fillText(tok.t,x,y);
+        }
+        x+=w;
+      });
+      y+=lh;
+    });
+    if(pi<paragraphs.length-1) y+=paraGap;
+  });
+  return y - lh - (paragraphs.length>1?paraGap:0) - topY; // approx block height
+}
+function blockHeight(paragraphs,fontPx,lineH,paraGap){
+  let lines=0; paragraphs.forEach(p=>lines+=p.length);
+  return lines*fontPx*lineH + (paragraphs.length-1)*paraGap;
+}
+
+function drawHexPhoto(ctx,img,cx,cy,R){
+  ctx.save();
+  ctx.beginPath();
+  for(let i=0;i<6;i++){
+    const a=Math.PI/180*(60*i-90);
+    const x=cx+R*Math.cos(a), y=cy+R*Math.sin(a);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.closePath();
+  ctx.clip();
+  if(img){
+    // cover fit
+    const s=Math.max(2*R/img.width,2*R/img.height);
+    const w=img.width*s,h=img.height*s;
+    ctx.drawImage(img,cx-w/2,cy-h/2,w,h);
+  } else {
+    ctx.fillStyle='#8a8aa0';ctx.fillRect(cx-R,cy-R,2*R,2*R);
+  }
+  ctx.restore();
+}
+function drawDWLogo(ctx,img,cx,cy,R){
+  if(img){
+    const s=Math.min(2*R/img.width,2*R/img.height);
+    ctx.drawImage(img,cx-img.width*s/2,cy-img.height*s/2,img.width*s,img.height*s);
+    return;
+  }
+  // gradient hexagon outline + DW monogram
+  ctx.save();
+  ctx.lineWidth=8;
+  ctx.strokeStyle=gradStops(ctx,cx-R,cx+R,T.grad);
+  ctx.beginPath();
+  for(let i=0;i<6;i++){
+    const a=Math.PI/180*(60*i-90);
+    const x=cx+R*Math.cos(a), y=cy+R*Math.sin(a);
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  }
+  ctx.closePath();ctx.stroke();
+  ctx.fillStyle=T.text;
+  ctx.font=`600 ${R*0.9}px ${state.font}`;
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('DW',cx,cy+2);
+  ctx.restore();
+}
+function drawQuestionMarks(ctx,cx,topY){
+  const cols=['#E0A98F','#C8A2C8','#9FB8C9','#E6D08A','#FFFFFF','#9FB8C9'];
+  ctx.textAlign='center';ctx.textBaseline='middle';
+  const pts=[[-120,30,52],[-60,-10,40],[0,15,72],[60,-5,46],[120,35,52],[-30,70,38],[40,80,44],[0,120,30]];
+  pts.forEach((p,i)=>{
+    ctx.fillStyle=cols[i%cols.length];
+    ctx.globalAlpha=0.92;
+    ctx.font=`600 ${p[2]}px ${state.font}`;
+    ctx.fillText('?',cx+p[0],topY+p[1]);
+  });
+  ctx.globalAlpha=1;
+}
+
+function render(){
+  ctx.clearRect(0,0,T.W,T.H);
+  ctx.fillStyle=T.bg;ctx.fillRect(0,0,T.W,T.H);
+  const s=state.slides[state.active];
+  if(!s){return;}
+  const fs=state.fontSize, lh=state.lineH, gap=fs*0.9;
+
+  if(s.type==='content'){
+    drawBar(ctx);
+    const paras=parseText(s.text);
+    const bh=blockHeight(paras,fs,lh,gap);
+    const top=Math.max(300, 604 - bh/2); // center around y≈604 (template band)
+    drawTextBlock(ctx,paras,T.textCenterX,top,fs,lh,gap);
+    drawSwipe(ctx);
+  }
+  else if(s.type==='intro'){
+    drawBar(ctx);
+    // heading
+    const hpar=parseText(s.heading);
+    const hfs=fs*0.82;
+    drawTextBlock(ctx,hpar,T.textCenterX,360,hfs,1.25,gap);
+    // body
+    const paras=parseText(s.text);
+    drawTextBlock(ctx,paras,T.textCenterX,360+hfs*1.9,fs*0.92,lh,gap);
+    // hexagon photo bottom-left
+    drawHexPhoto(ctx,state.photo,250,1140,150);
+    drawSwipe(ctx);
+  }
+  else if(s.type==='cta'){
+    if(state.showQ) drawQuestionMarks(ctx,T.textCenterX,200);
+    drawBar(ctx);
+    const paras=parseText(s.text);
+    const bh=blockHeight(paras,fs,lh,gap);
+    const top=Math.max(420, 640 - bh/2);
+    drawTextBlock(ctx,paras,T.textCenterX,top,fs,lh,gap);
+    // logo + footer
+    drawDWLogo(ctx,state.logo,180,1200,72);
+    if(s.footer){
+      const fp=parseText(s.footer);
+      ctx.save();
+      drawFooter(ctx,fp,300,1170,30,1.4);
+      ctx.restore();
+    }
+  }
+  drawPreviewScale();
+  autosave();
+}
+function drawFooter(ctx,paras,leftX,topY,fontPx,lineH){
+  ctx.font=`400 ${fontPx}px ${state.font}`;
+  ctx.fillStyle=T.text;ctx.textAlign='left';ctx.textBaseline='alphabetic';
+  let y=topY+fontPx;
+  paras.forEach(p=>p.forEach(line=>{
+    let x=leftX;
+    line.forEach(tok=>{ctx.fillStyle=tok.hl?gradStops(ctx,x,x+ctx.measureText(tok.t).width,T.grad):T.text;ctx.fillText(tok.t,x,y);x+=ctx.measureText(tok.t).width;});
+    y+=fontPx*lineH;
+  }));
+}
+function drawPreviewScale(){/* canvas CSS handles scaling */}
+
+// ============ UI WIRING ============
+const tabsEl=document.getElementById('tabs');
+const fieldsEl=document.getElementById('fields');
+
+function renderTabs(){
+  tabsEl.innerHTML='';
+  state.slides.forEach((s,i)=>{
+    const d=document.createElement('div');
+    d.className='tab'+(i===state.active?' active':'');
+    const label={content:'Inhalt',intro:'Profil',cta:'Abschluss'}[s.type];
+    d.innerHTML=`${i+1}· ${label}`+(state.slides.length>1?`<span class="x" data-i="${i}">✕</span>`:'');
+    d.onclick=(e)=>{ if(e.target.classList.contains('x')){removeSlide(i);} else {state.active=i;renderFields();renderTabs();render();} };
+    tabsEl.appendChild(d);
+  });
+}
+function renderFields(){
+  const s=state.slides[state.active];
+  let h='';
+  if(s.type==='content'){
+    h=`<label>Text (Zeilenumbruch = neue Zeile · Leerzeile = Absatz · *Wort* = Highlight)</label>
+       <textarea id="f_text">${esc(s.text)}</textarea>`;
+  } else if(s.type==='intro'){
+    h=`<label>Überschrift (z.B. Ich bin *Dennis*)</label>
+       <input type="text" id="f_heading" value="${esc(s.heading)}">
+       <label>Text</label><textarea id="f_text">${esc(s.text)}</textarea>`;
+  } else if(s.type==='cta'){
+    h=`<label>Frage / Haupttext (*Wort* = Highlight)</label>
+       <textarea id="f_text">${esc(s.text)}</textarea>
+       <label>Footer-Zeile (klein, unten)</label>
+       <textarea id="f_footer" style="min-height:60px">${esc(s.footer||'')}</textarea>`;
+  }
+  fieldsEl.innerHTML=h;
+  const t=document.getElementById('f_text'); if(t) t.oninput=e=>{s.text=e.target.value;render();};
+  const hd=document.getElementById('f_heading'); if(hd) hd.oninput=e=>{s.heading=e.target.value;render();};
+  const ft=document.getElementById('f_footer'); if(ft) ft.oninput=e=>{s.footer=e.target.value;render();};
+  document.getElementById('meta').textContent=`Slide ${state.active+1}/${state.slides.length} · ${s.type} · 1080×1350`;
+}
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function addSlide(type){state.slides.push(defaultSlide(type));state.active=state.slides.length-1;renderTabs();renderFields();render();}
+function removeSlide(i){if(state.slides.length<=1)return;state.slides.splice(i,1);state.active=Math.min(state.active,state.slides.length-1);renderTabs();renderFields();render();}
+
+// controls
+const fontSel=document.getElementById('font');
+fontSel.value=state.font;
+fontSel.onchange=e=>{state.font=e.target.value;render();};
+const fsR=document.getElementById('fontSize'); fsR.value=state.fontSize;
+const fsOut=document.getElementById('fsOut'); fsOut.value=state.fontSize;
+fsR.oninput=e=>{state.fontSize=+e.target.value;fsOut.value=e.target.value;render();};
+const lhR=document.getElementById('lineH'); lhR.value=state.lineH;
+const lhOut=document.getElementById('lhOut'); lhOut.value=state.lineH;
+lhR.oninput=e=>{state.lineH=+e.target.value;lhOut.value=(+e.target.value).toFixed(2);render();};
+lhOut.value=state.lineH.toFixed(2);
+document.getElementById('showBar').onchange=e=>{state.showBar=e.target.checked;render();};
+document.getElementById('showSwipe').onchange=e=>{state.showSwipe=e.target.checked;render();};
+document.getElementById('showQ').onchange=e=>{state.showQ=e.target.checked;render();};
+document.getElementById('photo').onchange=e=>loadImg(e,(img,url)=>{state.photo=img;state.photoData=url;render();});
+document.getElementById('logo').onchange=e=>loadImg(e,(img,url)=>{state.logo=img;state.logoData=url;setLogoStatus();render();});
+document.getElementById('logoClear').onclick=()=>{state.logo=null;state.logoData=null;document.getElementById('logo').value='';setLogoStatus();render();};
+function setLogoStatus(){const el=document.getElementById('logoStatus');if(el)el.textContent=state.logoData?'Logo geladen ✓ (wird auf der Abschluss-Slide genutzt)':'Noch kein Logo geladen.';}
+function loadImg(e,cb){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const im=new Image();im.onload=()=>cb(im,ev.target.result);im.src=ev.target.result;};r.readAsDataURL(f);}
+
+// caption
+const captionEl=document.getElementById('caption');
+captionEl.value=state.caption||'';
+captionEl.oninput=e=>{state.caption=e.target.value;autosave();};
+function copyCaption(){
+  const txt=state.caption||'';
+  if(!txt.trim()){flash('Keine Caption vorhanden');return;}
+  if(navigator.clipboard){navigator.clipboard.writeText(txt).then(()=>flash('Caption kopiert ✓'),()=>flash('Kopieren nicht möglich'));}
+  else {try{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();flash('Caption kopiert ✓');}catch(e){flash('Kopieren nicht möglich');}}
+}
+
+// ============ AUTOSAVE & LOCAL PROJECTS (localStorage) ============
+const AUTOSAVE_KEY='dw:autosave';
+const PROJECTS_KEY='dw:projects';
+function autosave(){try{localStorage.setItem(AUTOSAVE_KEY,JSON.stringify(projectData()));}catch(e){/* z.B. Privatmodus / Quota */}}
+function getLocalProjects(){try{return JSON.parse(localStorage.getItem(PROJECTS_KEY)||'{}');}catch(e){return {};}}
+function refreshLocalProjects(){
+  const sel=document.getElementById('projSel');const ps=getLocalProjects();const names=Object.keys(ps).sort();
+  sel.innerHTML=names.length?names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join(''):'<option value="">— noch keine —</option>';
+}
+function saveLocalProject(){
+  const name=(prompt('Projekt speichern als:','')||'').trim();
+  if(!name)return;
+  const ps=getLocalProjects();
+  if(ps[name] && !confirm(`„${name}“ überschreiben?`))return;
+  ps[name]=projectData();
+  try{localStorage.setItem(PROJECTS_KEY,JSON.stringify(ps));}catch(e){alert('Konnte nicht speichern (Speicher voll oder Privatmodus?).');return;}
+  refreshLocalProjects();document.getElementById('projSel').value=name;flash('Projekt gespeichert ✓');
+}
+function loadLocalProject(){
+  const name=document.getElementById('projSel').value;if(!name)return;
+  const ps=getLocalProjects();if(!ps[name]){alert('Projekt nicht gefunden.');return;}
+  try{applyProject(JSON.parse(JSON.stringify(ps[name])));flash(`„${name}“ geladen ✓`);}
+  catch(err){alert('Konnte Projekt nicht laden: '+err.message);}
+}
+function deleteLocalProject(){
+  const name=document.getElementById('projSel').value;if(!name)return;
+  if(!confirm(`„${name}“ wirklich löschen?`))return;
+  const ps=getLocalProjects();delete ps[name];
+  localStorage.setItem(PROJECTS_KEY,JSON.stringify(ps));refreshLocalProjects();flash('Projekt gelöscht');
+}
+
+// ============ TEMPLATES ============
+function populateTemplates(){
+  const sel=document.getElementById('templateSel');
+  const tpls=window.DW_TEMPLATES||[];
+  sel.innerHTML=tpls.length?tpls.map((t,i)=>`<option value="${i}">${esc(t.name)}</option>`).join(''):'<option value="">— keine Vorlagen —</option>';
+}
+function applyTemplate(i){
+  const t=(window.DW_TEMPLATES||[])[i];if(!t)return;
+  applyProject(JSON.parse(JSON.stringify(t.project)));
+}
+function loadTemplate(){
+  const i=+document.getElementById('templateSel').value;
+  if(Number.isNaN(i)||!window.DW_TEMPLATES||!window.DW_TEMPLATES[i]){alert('Keine Vorlage gewählt.');return;}
+  if(!confirm('Aktuelles Projekt durch die Vorlage ersetzen?'))return;
+  applyTemplate(i);flash('Vorlage geladen ✓');
+}
+
+// ============ EXPORT ============
+function exportCurrent(){
+  render();
+  canvas.toBlob(b=>{
+    const a=document.createElement('a');
+    a.download=`dw-slide-${state.active+1}.png`;
+    a.href=URL.createObjectURL(b);a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  },'image/png');
+}
+function canvasBlob(){return new Promise(res=>canvas.toBlob(res,'image/png'));}
+async function exportAll(){
+  const prev=state.active;
+  flash('Exportiere alle Slides…');
+  // collect a PNG blob per slide
+  const blobs=[];
+  for(let i=0;i<state.slides.length;i++){
+    state.active=i;render();
+    await new Promise(r=>requestAnimationFrame(r)); // let the frame paint
+    blobs.push(await canvasBlob());
+  }
+  state.active=prev;renderTabs();renderFields();render();
+
+  if(window.JSZip){
+    const zip=new JSZip();
+    blobs.forEach((b,i)=>zip.file(`dw-slide-${i+1}.png`,b));
+    const content=await zip.generateAsync({type:'blob'});
+    const a=document.createElement('a');
+    a.download='dw-slides.zip';
+    a.href=URL.createObjectURL(content);a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+    flash(`${blobs.length} Slides als ZIP exportiert ✓`);
+  } else {
+    // fallback: sequential single downloads
+    for(let i=0;i<blobs.length;i++){
+      const a=document.createElement('a');
+      a.download=`dw-slide-${i+1}.png`;
+      a.href=URL.createObjectURL(blobs[i]);a.click();
+      await new Promise(r=>setTimeout(()=>{URL.revokeObjectURL(a.href);r();},700));
+    }
+    flash('Einzeln exportiert (ZIP nicht verfügbar)');
+  }
+}
+function saveJSON(){
+  const data=projectData();
+  const a=document.createElement('a');
+  a.download='dw-carousel.json';
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+  a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+function applyProject(d){
+  if(!d || !Array.isArray(d.slides) || d.slides.length===0)
+    throw new Error('Kein gültiges Projekt (es fehlt "slides").');
+  Object.assign(state,d);state.active=0;
+  state.caption=d.caption||'';
+  fontSel.value=state.font;fsR.value=state.fontSize;fsOut.value=state.fontSize;
+  lhR.value=state.lineH;lhOut.value=(+state.lineH).toFixed(2);
+  document.getElementById('showBar').checked=!!state.showBar;
+  document.getElementById('showSwipe').checked=!!state.showSwipe;
+  document.getElementById('showQ').checked=!!state.showQ;
+  document.getElementById('caption').value=state.caption;
+  // rebuild embedded images (logo/photo) so they survive save/load/paste
+  state.photo=null;state.logo=null;
+  if(d.photoData){const im=new Image();im.onload=()=>render();im.src=d.photoData;state.photo=im;}
+  if(d.logoData){const im=new Image();im.onload=()=>render();im.src=d.logoData;state.logo=im;}
+  setLogoStatus();
+  renderTabs();renderFields();render();
+}
+function projectData(){
+  return {font:state.font,fontSize:state.fontSize,lineH:state.lineH,
+    showBar:state.showBar,showSwipe:state.showSwipe,showQ:state.showQ,
+    caption:state.caption||'',slides:state.slides,
+    photoData:state.photoData||null,logoData:state.logoData||null};
+}
+document.getElementById('loadFile').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=ev=>{try{applyProject(JSON.parse(ev.target.result));}
+    catch(err){alert('Konnte Datei nicht laden: '+err.message);}};
+  r.readAsText(f);
+};
+function loadFromPaste(){
+  const raw=document.getElementById('pasteBox').value.trim();
+  if(!raw){alert('Bitte zuerst das Projekt-JSON in das Feld einfügen.');return;}
+  try{applyProject(JSON.parse(raw));document.getElementById('pasteBox').value='';}
+  catch(err){alert('Konnte den eingefügten Text nicht lesen:\n'+err.message);}
+}
+function copyProject(){
+  const txt=JSON.stringify(projectData(),null,2);
+  const box=document.getElementById('pasteBox');
+  box.value=txt;box.select();
+  if(navigator.clipboard){navigator.clipboard.writeText(txt).then(
+    ()=>flash('Projekt-Text kopiert ✓'),()=>flash('Text steht im Feld – manuell kopieren'));
+  } else {try{document.execCommand('copy');flash('Projekt-Text kopiert ✓');}catch(e){flash('Text steht im Feld');}}
+}
+function flash(msg){const m=document.getElementById('meta');const old=m.textContent;m.textContent=msg;setTimeout(()=>{m.textContent=old;},1800);}
+
+// ============ INIT ============
+function boot(){
+  populateTemplates();
+  refreshLocalProjects();
+  // letzte Sitzung wiederherstellen, sonst erste Vorlage laden
+  const saved=localStorage.getItem(AUTOSAVE_KEY);
+  if(saved){
+    try{applyProject(JSON.parse(saved));return;}catch(e){/* fällt unten auf Vorlage zurück */}
+  }
+  if(window.DW_TEMPLATES&&window.DW_TEMPLATES.length){applyTemplate(0);}
+  else{state.slides=[defaultSlide('content')];renderTabs();renderFields();render();}
+}
+// ensure fonts are ready before first paint
+if(document.fonts && document.fonts.ready){
+  document.fonts.load("500 56px 'Cormorant Garamond'").then(()=>{});
+  document.fonts.ready.then(()=>render());
+}
+boot();
+</script>
+</body>
+</html>

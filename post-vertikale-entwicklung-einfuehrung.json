@@ -1,0 +1,35 @@
+{
+  "font": "'Cormorant Garamond', serif",
+  "fontSize": 56,
+  "lineH": 1.34,
+  "showBar": true,
+  "showSwipe": true,
+  "showQ": true,
+  "slides": [
+    {
+      "type": "content",
+      "text": "Jemand sagt dir\neinen Satz,\nder sitzt.\n\nDein Puls steigt,\nund in dir ist nur\nein Impuls:\n*rechtfertigen*."
+    },
+    {
+      "type": "content",
+      "text": "Du nimmst dir vor,\nruhiger zu werden.\nDurchatmen,\nnichts persönlich nehmen.\n\nUnd trotzdem:\nim *Kern*\npassiert dasselbe."
+    },
+    {
+      "type": "content",
+      "text": "Bis du eines Tages\nmitten im Reflex\netwas bemerkst:\n\n„Da *reagiert*\ngerade etwas\nin mir.\""
+    },
+    {
+      "type": "content",
+      "text": "Das ist der Sprung:\nnicht weniger Reflex —\nsondern ein Du,\ndas *daneben* steht.\n\nWas dich gestern hatte,\nkannst du heute halten."
+    },
+    {
+      "type": "content",
+      "text": "Genau das ist\n*vertikale* Entwicklung.\n\nKein neues Wissen.\nEin größerer Standpunkt,\nvon dem aus du\ndich selbst siehst."
+    },
+    {
+      "type": "cta",
+      "text": "Achte diese Woche\nauf den Moment,\nin dem etwas\nin dir *reagiert*.\n\nUnd frag dich:\nWer schaut da\neigentlich zu?",
+      "footer": "Mehr zur vertikalen Entwicklung\nin den nächsten Wochen. Folge mir."
+    }
+  ]
+}

@@ -1,0 +1,5 @@
+# Export- und Mockup-PNGs (jederzeit neu aus dem Generator exportierbar)
+*.png
+
+# macOS
+.DS_Store

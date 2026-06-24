@@ -1,0 +1,35 @@
+{
+  "font": "'Cormorant Garamond', serif",
+  "fontSize": 54,
+  "lineH": 1.34,
+  "showBar": true,
+  "showSwipe": true,
+  "showQ": true,
+  "slides": [
+    {
+      "type": "content",
+      "text": "Derselbe Satz:\n„Du hörst mir\nnie richtig zu.“\n\nDrei Menschen.\nDrei verschiedene\n*Welten*."
+    },
+    {
+      "type": "content",
+      "text": "„Das stimmt\ndoch gar nicht.“\n\nDer Satz ist\ndas *Problem*.\nNicht ich."
+    },
+    {
+      "type": "content",
+      "text": "„Sag mir,\nwas ich ändern soll.“\n\nIch *löse* das.\nWie eine Aufgabe."
+    },
+    {
+      "type": "content",
+      "text": "„Was macht das\nmit mir —\nund mit uns?“\n\nIch werde *Teil*\ndessen, was\nich anschaue."
+    },
+    {
+      "type": "content",
+      "text": "Gleicher Satz —\nund doch steht jeder\nin einer anderen\n*Wirklichkeit*.\n\nNicht das Wissen\nändert sich,\nsondern der Blick\ndarauf."
+    },
+    {
+      "type": "cta",
+      "text": "Welche der drei\nStimmen\nwar gerade *deine*?\n\nUnd welche\nmöchtest du\nöfter hören?",
+      "footer": "Es gibt eine Art zu wachsen,\nüber die kaum jemand spricht. Folge mir."
+    }
+  ]
+}

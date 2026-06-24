@@ -1,0 +1,40 @@
+{
+  "font": "'Cormorant Garamond', serif",
+  "fontSize": 56,
+  "lineH": 1.34,
+  "showBar": true,
+  "showSwipe": true,
+  "showQ": true,
+  "slides": [
+    {
+      "type": "content",
+      "text": "Ich war mir *sicher*:\nIch hatte gerade\nein Level-up gemacht.\n\nImmerhin hatte ich\ndrei Bücher über\nEntwicklungsstufen gelesen."
+    },
+    {
+      "type": "content",
+      "text": "Ab da konnte ich\njeden im Raum\nsofort *einordnen*.\n\nSehr praktisch:\nDie Probleme lagen\nplötzlich immer\nbei den anderen."
+    },
+    {
+      "type": "content",
+      "text": "Bis jemand fragte,\naus welcher Stufe\nich das eigentlich\n*beurteile*.\n\nStille.\nMein schönes Modell\nhatte für diese Frage\nkeinen Platz."
+    },
+    {
+      "type": "content",
+      "text": "Ich war nicht\nhöher gestiegen.\nIch hatte nur mehr\n*Vokabeln*.\n\nMehr wissen\nist horizontal.\nAnders sehen\nist vertikal."
+    },
+    {
+      "type": "content",
+      "text": "*Entwicklung* beginnt\nnicht da, wo ich\nandere einordnen kann.\n\nSondern da, wo ich\nbemerke, womit\nich selbst gerade\nschaue."
+    },
+    {
+      "type": "intro",
+      "heading": "Ich bin *Dennis*",
+      "text": "Ich arbeite mit Menschen\nan den Stellen, an denen\ndas nächste Modell\nnicht weiterhilft…\n\n… sondern eine andere\nSicht auf sich selbst."
+    },
+    {
+      "type": "cta",
+      "text": "Wo ertappst du dich,\nwie du andere\nso souverän *einordnest* —\nund dich selbst\ndabei vergisst?",
+      "footer": "Folge mir für mehr Gedanken über Muster,\nEntwicklung und neue Sichtweisen."
+    }
+  ]
+}
