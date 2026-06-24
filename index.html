@@ -11,160 +11,258 @@
 <script src="templates.js"></script>
 <style>
   :root{
-    --bg:#1B0739;
-    --panel:#241046;
-    --panel2:#2d1556;
-    --line:#3c2168;
-    --text:#ece7f5;
-    --muted:#a99fc4;
-    --teal:#3aa9b5;
+    --bg:#120427;
+    --ink:#1B0739;
+    --panel:#1e0c3f;
+    --panel2:#26124e;
+    --field:#170933;
+    --line:#36205f;
+    --line2:#4a2c80;
+    --text:#ECE7F5;
+    --muted:#A99FC4;
+    --teal:#3AA9B5;
     --c1:#4CB7F5; --c2:#6D68F0; --c3:#C65ACB;
+    --grad:linear-gradient(120deg,var(--c1),var(--c2) 52%,var(--c3));
+    --r:13px;
   }
   *{box-sizing:border-box;}
+  html,body{height:100%;}
   body{
-    margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
-    background:#140529;color:var(--text);display:flex;height:100vh;overflow:hidden;
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;
+    background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden;
   }
+  ::selection{background:rgba(109,104,240,.4);}
+
   /* ---- Left editor panel ---- */
-  #editor{width:430px;min-width:430px;height:100%;overflow-y:auto;background:var(--panel);
-    border-right:1px solid var(--line);padding:18px 18px 60px;}
-  #editor h1{font-size:17px;margin:0 0 2px;font-weight:600;letter-spacing:.3px;}
-  #editor .sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5;}
-  .group{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px;}
-  .group h2{font-size:12px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:0 0 10px;font-weight:600;}
-  label{display:block;font-size:12px;color:var(--muted);margin:10px 0 4px;}
-  textarea,input[type=text],select{width:100%;background:#1a0b33;border:1px solid var(--line);
-    color:var(--text);border-radius:8px;padding:9px 10px;font-size:13px;font-family:inherit;resize:vertical;}
-  textarea{min-height:140px;line-height:1.5;}
-  input[type=range]{width:100%;}
+  #editor{
+    width:432px;min-width:432px;height:100%;overflow-y:auto;
+    background:linear-gradient(180deg,#1d0b3e,#170832);
+    border-right:1px solid var(--line);
+    padding:20px 18px 80px;
+    scrollbar-width:thin;scrollbar-color:var(--line2) transparent;
+  }
+  #editor::-webkit-scrollbar{width:9px;}
+  #editor::-webkit-scrollbar-thumb{background:var(--line);border-radius:9px;border:2px solid transparent;background-clip:content-box;}
+
+  /* header */
+  #appbar{display:flex;align-items:center;gap:13px;margin-bottom:18px;}
+  #appbar .mark{width:7px;height:42px;border-radius:6px;background:var(--grad);flex:0 0 auto;
+    box-shadow:0 0 18px rgba(109,104,240,.45);}
+  #appbar h1{font-family:'Cormorant Garamond',serif;font-size:26px;line-height:1;margin:0;font-weight:600;letter-spacing:.2px;}
+  #appbar .sub{font-size:12px;color:var(--muted);margin-top:3px;}
+
+  /* slide tabs */
+  #tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
+  .tab{padding:7px 11px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);
+    font-size:12px;cursor:pointer;position:relative;transition:.15s;display:flex;align-items:center;gap:7px;}
+  .tab:hover{border-color:var(--line2);}
+  .tab.active{background:var(--grad);border-color:transparent;color:#fff;font-weight:600;box-shadow:0 4px 14px rgba(76,183,245,.25);}
+  .tab .x{opacity:.6;font-size:11px;}
+  .tab .x:hover{opacity:1;}
+  .addrow{display:flex;gap:7px;margin-bottom:16px;}
+  .addrow button{flex:1;font-size:12px;padding:8px 6px;}
+
+  /* collapsible groups */
+  details.group{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+    margin-bottom:12px;overflow:hidden;}
+  details.group[open]{border-color:var(--line2);}
+  summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;
+    padding:13px 14px;font-size:11.5px;text-transform:uppercase;letter-spacing:1.3px;
+    color:var(--muted);font-weight:700;user-select:none;}
+  summary::-webkit-details-marker{display:none;}
+  summary::after{content:'';margin-left:auto;width:7px;height:7px;border-right:2px solid var(--muted);
+    border-bottom:2px solid var(--muted);transform:rotate(-45deg);transition:transform .2s;opacity:.7;}
+  details[open] summary::after{transform:rotate(45deg);}
+  summary:hover{color:var(--text);}
+  summary .dot{width:6px;height:6px;border-radius:50%;background:var(--grad);flex:0 0 auto;}
+  .gbody{padding:2px 14px 16px;}
+
+  label{display:block;font-size:11.5px;color:var(--muted);margin:11px 0 5px;font-weight:500;}
+  textarea,input[type=text],select{
+    width:100%;background:var(--field);border:1px solid var(--line);
+    color:var(--text);border-radius:9px;padding:10px 11px;font-size:13px;font-family:inherit;resize:vertical;
+    transition:border-color .15s,box-shadow .15s;}
+  textarea:focus,input[type=text]:focus,select:focus{outline:none;border-color:var(--c2);
+    box-shadow:0 0 0 3px rgba(109,104,240,.22);}
+  textarea{min-height:130px;line-height:1.55;}
+  input[type=file]{width:100%;font-size:11.5px;color:var(--muted);}
+  input[type=file]::file-selector-button{font-family:inherit;font-size:11.5px;font-weight:600;
+    background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:7px;
+    padding:6px 10px;margin-right:9px;cursor:pointer;}
+  input[type=file]::file-selector-button:hover{border-color:var(--line2);}
+  input[type=range]{width:100%;accent-color:var(--c2);height:22px;}
   .row{display:flex;gap:8px;}
   .row>*{flex:1;}
-  .rangewrap{display:flex;align-items:center;gap:8px;}
-  .rangewrap output{font-size:12px;color:var(--text);min-width:34px;text-align:right;}
-  button{cursor:pointer;border:none;border-radius:8px;padding:9px 12px;font-size:13px;font-weight:600;
-    font-family:inherit;background:var(--line);color:var(--text);transition:.15s;}
-  button:hover{filter:brightness(1.2);}
-  button.primary{background:linear-gradient(90deg,var(--c1),var(--c3));color:#fff;}
+  .rangewrap{display:flex;align-items:center;gap:10px;}
+  .rangewrap output{font-size:12px;color:var(--text);min-width:38px;text-align:right;
+    background:var(--field);border:1px solid var(--line);border-radius:6px;padding:2px 4px;}
+
+  button{cursor:pointer;border:none;border-radius:9px;padding:9px 12px;font-size:12.5px;font-weight:600;
+    font-family:inherit;background:var(--panel2);color:var(--text);transition:.15s;border:1px solid transparent;}
+  button:hover{filter:brightness(1.12);}
+  button.primary{background:var(--grad);color:#fff;box-shadow:0 4px 14px rgba(109,104,240,.28);}
   button.ghost{background:transparent;border:1px solid var(--line);}
-  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
-  .btnrow button{flex:1;min-width:90px;}
-  /* slide tabs */
-  #tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
-  .tab{padding:6px 11px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);
-    font-size:12px;cursor:pointer;position:relative;}
-  .tab.active{background:linear-gradient(90deg,var(--c1),var(--c3));border-color:transparent;color:#fff;font-weight:600;}
-  .tab .x{margin-left:6px;opacity:.6;}
-  .tab .x:hover{opacity:1;}
-  .hint{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.5;}
+  button.ghost:hover{border-color:var(--line2);background:rgba(255,255,255,.03);filter:none;}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+  .btnrow button{flex:1;min-width:92px;}
+
+  /* segmented style switch */
+  .seg{display:flex;gap:5px;background:var(--field);border:1px solid var(--line);border-radius:11px;padding:4px;}
+  .seg-btn{flex:1;background:transparent;color:var(--muted);font-weight:600;font-size:12.5px;padding:9px 6px;border-radius:8px;border:none;text-align:center;}
+  .seg-btn:hover{color:var(--text);filter:none;}
+  .seg-btn.active{background:var(--grad);color:#fff;box-shadow:0 3px 10px rgba(76,183,245,.3);}
+
+  .hint{font-size:11px;color:var(--muted);margin-top:7px;line-height:1.55;}
+  .toggle{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--text);margin:11px 0;}
+  .toggle input{width:auto;accent-color:var(--c2);width:16px;height:16px;}
+  .toggle label{margin:0;color:var(--text);font-size:12.5px;}
   .swatch{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:middle;margin-right:4px;}
+  .legend{font-size:10.5px;color:var(--muted);line-height:1.7;padding:0 4px;}
+
   /* ---- Right preview ---- */
   #stage{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:24px;overflow:auto;background:radial-gradient(circle at 50% 30%,#1d0a3d,#140529);}
-  #canvasWrap{box-shadow:0 18px 60px rgba(0,0,0,.55);border-radius:6px;overflow:hidden;}
+    padding:24px;overflow:auto;
+    background:radial-gradient(circle at 50% 22%,#23114a,#120427 70%);}
+  #canvasWrap{box-shadow:0 22px 70px rgba(0,0,0,.6);border-radius:8px;overflow:hidden;
+    border:1px solid rgba(255,255,255,.06);}
   canvas#preview{display:block;width:432px;height:540px;}
-  #stageBar{margin-top:18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;}
-  #stageBar .meta{font-size:12px;color:var(--muted);}
-  .toggle{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted);margin:10px 0;}
-  .toggle input{width:auto;}
+  #stageBar{margin-top:20px;display:flex;gap:14px;align-items:center;justify-content:center;}
+  #stageBar .meta{font-size:12px;color:var(--muted);min-width:230px;text-align:center;letter-spacing:.2px;}
+  .navbtn{width:36px;height:36px;border-radius:50%;background:var(--panel2);border:1px solid var(--line);
+    color:var(--text);font-size:17px;line-height:1;padding:0;display:flex;align-items:center;justify-content:center;}
+  .navbtn:hover{border-color:var(--line2);filter:none;}
+
+  @media (max-width:860px){
+    body{flex-direction:column;height:auto;overflow:auto;}
+    #editor{width:100%;min-width:0;height:auto;border-right:none;border-bottom:1px solid var(--line);}
+    #stage{padding:18px;}
+  }
 </style>
 </head>
 <body>
   <div id="editor">
-    <h1>DW Post-Generator</h1>
-    <div class="sub">Karussell-Posts im DW-Stil. Text mit Zeilenumbrüchen eingeben, leere Zeile = Absatz-Abstand. Schlüsselwörter mit *Sternchen* markieren → Verlauf-Highlight.</div>
+    <header id="appbar">
+      <div class="mark"></div>
+      <div>
+        <h1>Post-Generator</h1>
+        <div class="sub">Karussells im DW-Stil · 1080×1350</div>
+      </div>
+    </header>
 
     <div id="tabs"></div>
-    <div class="btnrow" style="margin-bottom:14px;">
+    <div class="addrow">
       <button class="ghost" onclick="addSlide('content')">+ Inhalt</button>
       <button class="ghost" onclick="addSlide('intro')">+ Profil</button>
       <button class="ghost" onclick="addSlide('cta')">+ Abschluss</button>
     </div>
 
-    <div class="group">
-      <h2>Vorlagen & Projekte</h2>
-      <label>Neues Projekt aus Vorlage</label>
-      <div class="row">
-        <select id="templateSel"></select>
-        <button class="ghost" style="flex:0 0 auto;" onclick="loadTemplate()">Laden</button>
-      </div>
-      <div class="hint">Ersetzt das aktuelle Projekt. Vorher ggf. unten speichern.</div>
-      <label style="margin-top:12px;">Meine Projekte (nur dieser Browser)</label>
-      <div class="row">
-        <select id="projSel"></select>
-        <button class="ghost" style="flex:0 0 auto;" onclick="loadLocalProject()">Laden</button>
-      </div>
-      <div class="btnrow">
-        <button class="ghost" onclick="saveLocalProject()">Speichern als…</button>
-        <button class="ghost" onclick="deleteLocalProject()">Löschen</button>
-      </div>
-      <div class="hint">Gespeichert wird nur in diesem Browser (kein Geräte-Sync). Für überall: unten „Projekt speichern“ als JSON.</div>
-    </div>
+    <details class="group" id="g-slide" open>
+      <summary><span class="dot"></span>Slide-Inhalt</summary>
+      <div class="gbody"><div id="fields"></div></div>
+    </details>
 
-    <div class="group">
-      <h2>Slide-Inhalt</h2>
-      <div id="fields"></div>
-    </div>
+    <details class="group" id="g-style" open>
+      <summary><span class="dot"></span>Design-Stil</summary>
+      <div class="gbody">
+        <div class="seg">
+          <button class="seg-btn" data-style="style1">Stil 1 · Klar</button>
+          <button class="seg-btn" data-style="style2">Stil 2 · Scribble</button>
+        </div>
+        <div class="toggle" id="scribbleToggle" style="display:none;margin-top:12px;">
+          <input type="checkbox" id="showScribbles" checked>
+          <label for="showScribbles">Handgezeichneter Hintergrund</label>
+        </div>
+        <div class="hint">Stil 2 legt eine handgezeichnete Hintergrund-Textur an und macht pro Slide eine Illustration unten möglich (im Slide-Inhalt hochladbar). Der Text rückt dafür nach oben.</div>
+      </div>
+    </details>
 
-    <div class="group">
-      <h2>Typografie</h2>
-      <label>Schriftart</label>
-      <select id="font">
-        <option value="'Cormorant Garamond', serif">Cormorant Garamond (elegant)</option>
-        <option value="'EB Garamond', serif">EB Garamond (klassisch)</option>
-        <option value="'Playfair Display', serif">Playfair Display (kontrastreich)</option>
-      </select>
-      <label>Schriftgröße <span id="fsVal" style="color:var(--text)"></span></label>
-      <div class="rangewrap"><input type="range" id="fontSize" min="34" max="78" step="1"><output id="fsOut"></output></div>
-      <label>Zeilenabstand</label>
-      <div class="rangewrap"><input type="range" id="lineH" min="1.1" max="1.7" step="0.01"><output id="lhOut"></output></div>
-    </div>
+    <details class="group" id="g-type">
+      <summary><span class="dot"></span>Typografie</summary>
+      <div class="gbody">
+        <label>Schriftart</label>
+        <select id="font">
+          <option value="'Cormorant Garamond', serif">Cormorant Garamond (elegant)</option>
+          <option value="'EB Garamond', serif">EB Garamond (klassisch)</option>
+          <option value="'Playfair Display', serif">Playfair Display (kontrastreich)</option>
+        </select>
+        <label>Schriftgröße (Maximum – Text verkleinert sich bei Überlauf automatisch)</label>
+        <div class="rangewrap"><input type="range" id="fontSize" min="34" max="78" step="1"><output id="fsOut"></output></div>
+        <label>Zeilenabstand</label>
+        <div class="rangewrap"><input type="range" id="lineH" min="1.1" max="1.7" step="0.01"><output id="lhOut"></output></div>
+      </div>
+    </details>
 
-    <div class="group">
-      <h2>Elemente</h2>
-      <div class="toggle"><input type="checkbox" id="showBar" checked><label for="showBar" style="margin:0;color:var(--text)">Verlauf-Balken links</label></div>
-      <div class="toggle"><input type="checkbox" id="showSwipe" checked><label for="showSwipe" style="margin:0;color:var(--text)">Swipe-Pfeil (Pill)</label></div>
-      <div class="toggle"><input type="checkbox" id="showQ"><label for="showQ" style="margin:0;color:var(--text)">Fragezeichen-Deko (für Abschluss)</label></div>
-      <div id="uploadIntro">
+    <details class="group" id="g-elem">
+      <summary><span class="dot"></span>Elemente</summary>
+      <div class="gbody">
+        <div class="toggle"><input type="checkbox" id="showBar" checked><label for="showBar">Verlauf-Balken links</label></div>
+        <div class="toggle"><input type="checkbox" id="showSwipe" checked><label for="showSwipe">Swipe-Pfeil (Pill)</label></div>
+        <div class="toggle"><input type="checkbox" id="showQ"><label for="showQ">Fragezeichen-Deko (Abschluss)</label></div>
         <label>Profilfoto für Profil-Slide (Hexagon)</label>
         <input type="file" id="photo" accept="image/*">
-      </div>
-      <div id="uploadCta">
-        <label>Original-Logo für Abschluss-Slide (sonst DW-Hexagon gezeichnet)</label>
+        <label style="margin-top:13px;">Logo für Abschluss-Slide (sonst DW-Hexagon gezeichnet)</label>
         <input type="file" id="logo" accept="image/*">
         <div class="hint" id="logoStatus">Noch kein Logo geladen.</div>
-        <button class="ghost" id="logoClear" style="margin-top:6px;width:100%;">Logo entfernen</button>
+        <button class="ghost" id="logoClear" style="margin-top:8px;width:100%;">Logo entfernen</button>
       </div>
-    </div>
+    </details>
 
-    <div class="group">
-      <h2>Caption (Instagram-Text)</h2>
-      <textarea id="caption" placeholder="Bildunterschrift / Post-Text … wird mit dem Projekt gespeichert (JSON + Browser), aber nicht aufs Bild gerendert."></textarea>
-      <div class="btnrow">
-        <button class="ghost" onclick="copyCaption()">Caption kopieren</button>
+    <details class="group" id="g-tpl">
+      <summary><span class="dot"></span>Vorlagen & Projekte</summary>
+      <div class="gbody">
+        <label>Neues Projekt aus Vorlage</label>
+        <div class="row">
+          <select id="templateSel"></select>
+          <button class="ghost" style="flex:0 0 auto;" onclick="loadTemplate()">Laden</button>
+        </div>
+        <div class="hint">Ersetzt das aktuelle Projekt. Vorher ggf. speichern.</div>
+        <label style="margin-top:13px;">Meine Projekte (nur dieser Browser)</label>
+        <div class="row">
+          <select id="projSel"></select>
+          <button class="ghost" style="flex:0 0 auto;" onclick="loadLocalProject()">Laden</button>
+        </div>
+        <div class="btnrow">
+          <button class="ghost" onclick="saveLocalProject()">Speichern als…</button>
+          <button class="ghost" onclick="deleteLocalProject()">Löschen</button>
+        </div>
+        <div class="hint">Nur in diesem Browser gespeichert (kein Geräte-Sync). Für überall: unten „Projekt speichern“ als JSON.</div>
       </div>
-    </div>
+    </details>
 
-    <div class="group">
-      <h2>Export & Speichern</h2>
-      <div class="btnrow">
-        <button class="primary" onclick="exportCurrent()">PNG: diese Slide</button>
-        <button class="primary" onclick="exportAll()">PNG: alle</button>
+    <details class="group" id="g-cap" open>
+      <summary><span class="dot"></span>Caption (Instagram-Text)</summary>
+      <div class="gbody">
+        <textarea id="caption" placeholder="Bildunterschrift / Post-Text … wird mit dem Projekt gespeichert (JSON + Browser), aber nicht aufs Bild gerendert."></textarea>
+        <div class="btnrow">
+          <button class="ghost" onclick="copyCaption()">Caption kopieren</button>
+        </div>
       </div>
-      <div class="btnrow">
-        <button class="ghost" onclick="saveJSON()">Projekt speichern</button>
-        <button class="ghost" onclick="document.getElementById('loadFile').click()">Projekt laden</button>
-        <input type="file" id="loadFile" accept="application/json" style="display:none">
-      </div>
-      <label>Projekt per Paste einfügen (JSON hier reinkopieren)</label>
-      <textarea id="pasteBox" placeholder='{ "slides": [ … ] }  — hier einfügen und „Aus Feld laden" drücken' style="min-height:90px;font-family:ui-monospace,Menlo,monospace;font-size:12px;"></textarea>
-      <div class="btnrow">
-        <button class="primary" onclick="loadFromPaste()">Aus Feld laden</button>
-        <button class="ghost" onclick="copyProject()">Projekt-Text kopieren</button>
-      </div>
-      <div class="hint">PNG-Export: 1080×1350 px (Instagram 4:5). „Alle" lädt jede Slide einzeln herunter.</div>
-    </div>
+    </details>
 
-    <div class="hint" style="margin-top:6px;">
+    <details class="group" id="g-exp" open>
+      <summary><span class="dot"></span>Export & Speichern</summary>
+      <div class="gbody">
+        <div class="btnrow">
+          <button class="primary" onclick="exportCurrent()">PNG: diese Slide</button>
+          <button class="primary" onclick="exportAll()">PNG: alle (ZIP)</button>
+        </div>
+        <div class="btnrow">
+          <button class="ghost" onclick="saveJSON()">Projekt speichern</button>
+          <button class="ghost" onclick="document.getElementById('loadFile').click()">Projekt laden</button>
+          <input type="file" id="loadFile" accept="application/json" style="display:none">
+        </div>
+        <label>Projekt per Paste einfügen (JSON hier reinkopieren)</label>
+        <textarea id="pasteBox" placeholder='{ "slides": [ … ] }  — hier einfügen und „Aus Feld laden“ drücken' style="min-height:84px;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;"></textarea>
+        <div class="btnrow">
+          <button class="primary" onclick="loadFromPaste()">Aus Feld laden</button>
+          <button class="ghost" onclick="copyProject()">Projekt-Text kopieren</button>
+        </div>
+        <div class="hint">PNG-Export: 1080×1350 px (Instagram 4:5).</div>
+      </div>
+    </details>
+
+    <div class="legend">
       <span class="swatch" style="background:#1B0739"></span>BG #1B0739 &nbsp;
       <span class="swatch" style="background:linear-gradient(90deg,#4CB7F5,#C65ACB)"></span>Verlauf #4CB7F5→#6D68F0→#C65ACB &nbsp;
       <span class="swatch" style="background:#3aa9b5"></span>Teal #3AA9B5
@@ -174,7 +272,9 @@
   <div id="stage">
     <div id="canvasWrap"><canvas id="preview" width="1080" height="1350"></canvas></div>
     <div id="stageBar">
+      <button class="navbtn" onclick="prevSlide()" title="Vorherige Slide">‹</button>
       <span class="meta" id="meta"></span>
+      <button class="navbtn" onclick="nextSlide()" title="Nächste Slide">›</button>
     </div>
   </div>
 
@@ -188,8 +288,8 @@ const T = {
   teal:'#3AA9B5',
   bar:{x:88,w:16,y0:315,y1:893,r:8},
   pill:{x:792,y:1198,w:198,h:84,r:42},
-  margin:108,            // left text inset (text block is centered though)
   textCenterX:540,
+  textMaxW:840,          // max line width before auto-shrink
 };
 function gradStops(ctx,x0,x1,stops){
   const g=ctx.createLinearGradient(x0,0,x1,0);
@@ -217,6 +317,7 @@ let state = {
   fontSize:56,
   lineH:1.34,
   showBar:true, showSwipe:true, showQ:false,
+  style:'style1', showScribbles:true,
   caption:'',
   slides:[],
   active:0,
@@ -230,11 +331,9 @@ function defaultSlide(type){
 }
 
 // ============ TEXT PARSING ============
-// returns array of paragraphs; each paragraph = array of lines; each line = array of {t,hl}
 function parseText(txt){
-  const paras = txt.replace(/\r/g,'').split(/\n\s*\n/);
+  const paras = (txt||'').replace(/\r/g,'').split(/\n\s*\n/);
   return paras.map(p=>p.split('\n').map(line=>{
-    // split into tokens preserving spaces, mark *word* as highlight
     const parts=[]; const re=/\*([^*]+)\*/g; let last=0,m;
     while((m=re.exec(line))){
       if(m.index>last) parts.push({t:line.slice(last,m.index),hl:false});
@@ -251,6 +350,32 @@ function parseText(txt){
 const canvas=document.getElementById('preview');
 const ctx=canvas.getContext('2d');
 
+// deterministic PRNG so the scribble texture is identical on every slide/render
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+function drawScribbles(ctx){
+  const rnd=mulberry32(20240624);
+  ctx.save();
+  ctx.strokeStyle='#33205c';
+  ctx.globalAlpha=0.55;
+  ctx.lineCap='round';ctx.lineJoin='round';
+  for(let i=0;i<18;i++){
+    let x=rnd()*T.W, y=rnd()*T.H;
+    ctx.lineWidth=1.6+rnd()*1.8;
+    ctx.beginPath();ctx.moveTo(x,y);
+    const segs=3+Math.floor(rnd()*4);
+    for(let j=0;j<segs;j++){
+      const cx1=x+(rnd()-0.5)*300, cy1=y+(rnd()-0.5)*300;
+      const cx2=x+(rnd()-0.5)*300, cy2=y+(rnd()-0.5)*300;
+      const nx=x+(rnd()-0.5)*340, ny=y+(rnd()-0.5)*340;
+      ctx.bezierCurveTo(cx1,cy1,cx2,cy2,nx,ny);
+      x=nx;y=ny;
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
 function drawBar(ctx){
   if(!state.showBar) return;
   const b=T.bar;
@@ -265,7 +390,6 @@ function drawSwipe(ctx){
   ctx.strokeStyle=T.teal;
   roundRect(ctx,p.x,p.y,p.w,p.h,p.r);
   ctx.stroke();
-  // 4 chevrons
   const cy=p.y+p.h/2;
   ctx.strokeStyle=T.teal;ctx.lineWidth=8;ctx.lineCap='round';ctx.lineJoin='round';
   const startX=p.x+p.w/2-46, gap=24, ch=16;
@@ -279,15 +403,14 @@ function drawSwipe(ctx){
   }
 }
 
-// draw centered multi-line text block, returns total height; if measureOnly, doesn't draw
+// draw centered multi-line text block
 function drawTextBlock(ctx, paragraphs, cx, topY, fontPx, lineH, paraGap, opts={}){
   const lh=fontPx*lineH;
   ctx.textBaseline='alphabetic';
   ctx.textAlign='left';
-  let y=topY+fontPx; // baseline of first line
+  let y=topY+fontPx;
   paragraphs.forEach((para,pi)=>{
     para.forEach(line=>{
-      // measure full line width
       ctx.font=`${opts.weight||500} ${fontPx}px ${state.font}`;
       let total=0;
       line.forEach(tok=> total+=ctx.measureText(tok.t).width);
@@ -295,11 +418,7 @@ function drawTextBlock(ctx, paragraphs, cx, topY, fontPx, lineH, paraGap, opts={
       line.forEach(tok=>{
         const w=ctx.measureText(tok.t).width;
         if(!opts.measureOnly){
-          if(tok.hl){
-            ctx.fillStyle=gradStops(ctx,x,x+w,T.grad);
-          } else {
-            ctx.fillStyle=opts.color||T.text;
-          }
+          ctx.fillStyle = tok.hl ? gradStops(ctx,x,x+w,T.grad) : (opts.color||T.text);
           ctx.fillText(tok.t,x,y);
         }
         x+=w;
@@ -308,11 +427,30 @@ function drawTextBlock(ctx, paragraphs, cx, topY, fontPx, lineH, paraGap, opts={
     });
     if(pi<paragraphs.length-1) y+=paraGap;
   });
-  return y - lh - (paragraphs.length>1?paraGap:0) - topY; // approx block height
 }
 function blockHeight(paragraphs,fontPx,lineH,paraGap){
   let lines=0; paragraphs.forEach(p=>lines+=p.length);
   return lines*fontPx*lineH + (paragraphs.length-1)*paraGap;
+}
+function maxLineWidth(paragraphs,fontPx,weight){
+  ctx.font=`${weight||500} ${fontPx}px ${state.font}`;
+  let mw=0;
+  paragraphs.forEach(p=>p.forEach(line=>{
+    let w=0; line.forEach(tok=>w+=ctx.measureText(tok.t).width);
+    if(w>mw) mw=w;
+  }));
+  return mw;
+}
+// shrink font until the block fits both the height budget and the max width
+function fitFont(paragraphs, baseFs, lineH, maxH, maxW, minFs){
+  let fs=baseFs; minFs=minFs||24;
+  while(fs>minFs){
+    const h=blockHeight(paragraphs,fs,lineH,fs*0.9);
+    const w=maxLineWidth(paragraphs,fs);
+    if(h<=maxH && w<=maxW) break;
+    fs-=1;
+  }
+  return fs;
 }
 
 function drawHexPhoto(ctx,img,cx,cy,R){
@@ -326,7 +464,6 @@ function drawHexPhoto(ctx,img,cx,cy,R){
   ctx.closePath();
   ctx.clip();
   if(img){
-    // cover fit
     const s=Math.max(2*R/img.width,2*R/img.height);
     const w=img.width*s,h=img.height*s;
     ctx.drawImage(img,cx-w/2,cy-h/2,w,h);
@@ -341,7 +478,6 @@ function drawDWLogo(ctx,img,cx,cy,R){
     ctx.drawImage(img,cx-img.width*s/2,cy-img.height*s/2,img.width*s,img.height*s);
     return;
   }
-  // gradient hexagon outline + DW monogram
   ctx.save();
   ctx.lineWidth=8;
   ctx.strokeStyle=gradStops(ctx,cx-R,cx+R,T.grad);
@@ -371,42 +507,75 @@ function drawQuestionMarks(ctx,cx,topY){
   ctx.globalAlpha=1;
 }
 
+// image cache (illustrations); re-renders once an image finishes loading
+const imgCache=new Map();
+function getImg(dataURL){
+  if(!dataURL) return null;
+  let im=imgCache.get(dataURL);
+  if(!im){ im=new Image(); im.onload=()=>render(); im.src=dataURL; imgCache.set(dataURL,im); }
+  return (im.complete && im.naturalWidth) ? im : null;
+}
+// contain-fit an illustration into a bottom-anchored box
+function drawIlloBox(ctx,img,cx,bottom,boxW,maxH){
+  if(!img) return;
+  const s=Math.min(boxW/img.width, maxH/img.height);
+  const w=img.width*s, h=img.height*s;
+  ctx.drawImage(img, cx-w/2, bottom-h, w, h);
+}
+
 function render(){
   ctx.clearRect(0,0,T.W,T.H);
   ctx.fillStyle=T.bg;ctx.fillRect(0,0,T.W,T.H);
   const s=state.slides[state.active];
   if(!s){return;}
-  const fs=state.fontSize, lh=state.lineH, gap=fs*0.9;
+  const st=state.style||'style1';
+  const st2=(st==='style2');
+  if(st2 && state.showScribbles!==false) drawScribbles(ctx);
+
+  const fsBase=state.fontSize, lh=state.lineH, cx=T.textCenterX, maxW=T.textMaxW;
 
   if(s.type==='content'){
     drawBar(ctx);
     const paras=parseText(s.text);
-    const bh=blockHeight(paras,fs,lh,gap);
-    const top=Math.max(300, 604 - bh/2); // center around y≈604 (template band)
-    drawTextBlock(ctx,paras,T.textCenterX,top,fs,lh,gap);
+    const centerY = st2?500:604;
+    const maxH    = st2?430:860;
+    const fs=fitFont(paras,fsBase,lh,maxH,maxW);
+    const bh=blockHeight(paras,fs,lh,fs*0.9);
+    const top=Math.max(st2?260:300, centerY - bh/2);
+    drawTextBlock(ctx,paras,cx,top,fs,lh,fs*0.9);
+    if(st2) drawIlloBox(ctx,getImg(s.illo),540,1292,980,470);
     drawSwipe(ctx);
   }
   else if(s.type==='intro'){
     drawBar(ctx);
-    // heading
-    const hpar=parseText(s.heading);
-    const hfs=fs*0.82;
-    drawTextBlock(ctx,hpar,T.textCenterX,360,hfs,1.25,gap);
-    // body
+    const headY=st2?300:360;
+    const hasHeading=(s.heading||'').trim().length>0;
+    let bodyTop=headY;
+    if(hasHeading){
+      const hpar=parseText(s.heading);
+      const hfs=fitFont(hpar, Math.round(fsBase*0.82), 1.25, 99999, maxW);
+      drawTextBlock(ctx,hpar,cx,headY,hfs,1.25,hfs*0.9);
+      bodyTop = headY + blockHeight(hpar,hfs,1.25,hfs*0.9) + fsBase*0.5;
+    }
     const paras=parseText(s.text);
-    drawTextBlock(ctx,paras,T.textCenterX,360+hfs*1.9,fs*0.92,lh,gap);
-    // hexagon photo bottom-left
+    const bodyMaxH=Math.max(120, 960 - bodyTop);   // keep clear of hexagon photo (~y990)
+    const bfs=fitFont(paras, Math.round(fsBase*0.92), lh, bodyMaxH, maxW);
+    drawTextBlock(ctx,paras,cx,bodyTop,bfs,lh,bfs*0.9);
+    if(st2) drawIlloBox(ctx,getImg(s.illo),772,1292,470,360);  // bottom-right, next to photo
     drawHexPhoto(ctx,state.photo,250,1140,150);
     drawSwipe(ctx);
   }
   else if(s.type==='cta'){
-    if(state.showQ) drawQuestionMarks(ctx,T.textCenterX,200);
+    if(state.showQ) drawQuestionMarks(ctx,cx,st2?170:200);
     drawBar(ctx);
     const paras=parseText(s.text);
-    const bh=blockHeight(paras,fs,lh,gap);
-    const top=Math.max(420, 640 - bh/2);
-    drawTextBlock(ctx,paras,T.textCenterX,top,fs,lh,gap);
-    // logo + footer
+    const centerY = st2?500:640;
+    const maxH    = st2?430:720;
+    const fs=fitFont(paras,fsBase,lh,maxH,maxW);
+    const bh=blockHeight(paras,fs,lh,fs*0.9);
+    const top=Math.max(st2?300:420, centerY - bh/2);
+    drawTextBlock(ctx,paras,cx,top,fs,lh,fs*0.9);
+    if(st2) drawIlloBox(ctx,getImg(s.illo),540,1292,980,470);
     drawDWLogo(ctx,state.logo,180,1200,72);
     if(s.footer){
       const fp=parseText(s.footer);
@@ -415,7 +584,6 @@ function render(){
       ctx.restore();
     }
   }
-  drawPreviewScale();
   autosave();
 }
 function drawFooter(ctx,paras,leftX,topY,fontPx,lineH){
@@ -424,11 +592,10 @@ function drawFooter(ctx,paras,leftX,topY,fontPx,lineH){
   let y=topY+fontPx;
   paras.forEach(p=>p.forEach(line=>{
     let x=leftX;
-    line.forEach(tok=>{ctx.fillStyle=tok.hl?gradStops(ctx,x,x+ctx.measureText(tok.t).width,T.grad):T.text;ctx.fillText(tok.t,x,y);x+=ctx.measureText(tok.t).width;});
+    line.forEach(tok=>{const w=ctx.measureText(tok.t).width;ctx.fillStyle=tok.hl?gradStops(ctx,x,x+w,T.grad):T.text;ctx.fillText(tok.t,x,y);x+=w;});
     y+=fontPx*lineH;
   }));
 }
-function drawPreviewScale(){/* canvas CSS handles scaling */}
 
 // ============ UI WIRING ============
 const tabsEl=document.getElementById('tabs');
@@ -440,7 +607,7 @@ function renderTabs(){
     const d=document.createElement('div');
     d.className='tab'+(i===state.active?' active':'');
     const label={content:'Inhalt',intro:'Profil',cta:'Abschluss'}[s.type];
-    d.innerHTML=`${i+1}· ${label}`+(state.slides.length>1?`<span class="x" data-i="${i}">✕</span>`:'');
+    d.innerHTML=`<span>${i+1}· ${label}</span>`+(state.slides.length>1?`<span class="x" data-i="${i}">✕</span>`:'');
     d.onclick=(e)=>{ if(e.target.classList.contains('x')){removeSlide(i);} else {state.active=i;renderFields();renderTabs();render();} };
     tabsEl.appendChild(d);
   });
@@ -452,7 +619,7 @@ function renderFields(){
     h=`<label>Text (Zeilenumbruch = neue Zeile · Leerzeile = Absatz · *Wort* = Highlight)</label>
        <textarea id="f_text">${esc(s.text)}</textarea>`;
   } else if(s.type==='intro'){
-    h=`<label>Überschrift (z.B. Ich bin *Dennis*)</label>
+    h=`<label>Überschrift (optional, z.B. Ich bin *Dennis*)</label>
        <input type="text" id="f_heading" value="${esc(s.heading)}">
        <label>Text</label><textarea id="f_text">${esc(s.text)}</textarea>`;
   } else if(s.type==='cta'){
@@ -461,16 +628,26 @@ function renderFields(){
        <label>Footer-Zeile (klein, unten)</label>
        <textarea id="f_footer" style="min-height:60px">${esc(s.footer||'')}</textarea>`;
   }
+  if((state.style||'style1')==='style2'){
+    h+=`<label style="margin-top:13px;">Illustration unten (optional)</label>
+        <input type="file" id="f_illo" accept="image/*">
+        <div class="hint" id="f_illoStatus">${s.illo?'Illustration geladen ✓':'Keine Illustration.'}</div>
+        <button class="ghost" id="f_illoClear" style="margin-top:8px;width:100%;">Illustration entfernen</button>`;
+  }
   fieldsEl.innerHTML=h;
   const t=document.getElementById('f_text'); if(t) t.oninput=e=>{s.text=e.target.value;render();};
   const hd=document.getElementById('f_heading'); if(hd) hd.oninput=e=>{s.heading=e.target.value;render();};
   const ft=document.getElementById('f_footer'); if(ft) ft.oninput=e=>{s.footer=e.target.value;render();};
-  document.getElementById('meta').textContent=`Slide ${state.active+1}/${state.slides.length} · ${s.type} · 1080×1350`;
+  const il=document.getElementById('f_illo'); if(il) il.onchange=e=>loadImg(e,(img,url)=>{s.illo=url;renderFields();render();});
+  const ilc=document.getElementById('f_illoClear'); if(ilc) ilc.onclick=()=>{delete s.illo;renderFields();render();};
+  document.getElementById('meta').textContent=`Slide ${state.active+1}/${state.slides.length} · ${s.type} · ${(state.style==='style2')?'Stil 2':'Stil 1'}`;
 }
 function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 function addSlide(type){state.slides.push(defaultSlide(type));state.active=state.slides.length-1;renderTabs();renderFields();render();}
 function removeSlide(i){if(state.slides.length<=1)return;state.slides.splice(i,1);state.active=Math.min(state.active,state.slides.length-1);renderTabs();renderFields();render();}
+function prevSlide(){if(state.active>0){state.active--;renderTabs();renderFields();render();}}
+function nextSlide(){if(state.active<state.slides.length-1){state.active++;renderTabs();renderFields();render();}}
 
 // controls
 const fontSel=document.getElementById('font');
@@ -489,8 +666,18 @@ document.getElementById('showQ').onchange=e=>{state.showQ=e.target.checked;rende
 document.getElementById('photo').onchange=e=>loadImg(e,(img,url)=>{state.photo=img;state.photoData=url;render();});
 document.getElementById('logo').onchange=e=>loadImg(e,(img,url)=>{state.logo=img;state.logoData=url;setLogoStatus();render();});
 document.getElementById('logoClear').onclick=()=>{state.logo=null;state.logoData=null;document.getElementById('logo').value='';setLogoStatus();render();};
-function setLogoStatus(){const el=document.getElementById('logoStatus');if(el)el.textContent=state.logoData?'Logo geladen ✓ (wird auf der Abschluss-Slide genutzt)':'Noch kein Logo geladen.';}
+function setLogoStatus(){const el=document.getElementById('logoStatus');if(el)el.textContent=state.logoData?'Logo geladen ✓ (Abschluss-Slide)':'Noch kein Logo geladen.';}
 function loadImg(e,cb){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const im=new Image();im.onload=()=>cb(im,ev.target.result);im.src=ev.target.result;};r.readAsDataURL(f);}
+
+// style switch
+document.querySelectorAll('.seg-btn').forEach(b=>b.onclick=()=>{state.style=b.dataset.style;syncStyleUI();renderFields();render();});
+document.getElementById('showScribbles').onchange=e=>{state.showScribbles=e.target.checked;render();};
+function syncStyleUI(){
+  const st=state.style||'style1';
+  document.querySelectorAll('.seg-btn').forEach(b=>b.classList.toggle('active', b.dataset.style===st));
+  document.getElementById('scribbleToggle').style.display = (st==='style2')?'flex':'none';
+  document.getElementById('showScribbles').checked = state.showScribbles!==false;
+}
 
 // caption
 const captionEl=document.getElementById('caption');
@@ -506,7 +693,8 @@ function copyCaption(){
 // ============ AUTOSAVE & LOCAL PROJECTS (localStorage) ============
 const AUTOSAVE_KEY='dw:autosave';
 const PROJECTS_KEY='dw:projects';
-function autosave(){try{localStorage.setItem(AUTOSAVE_KEY,JSON.stringify(projectData()));}catch(e){/* z.B. Privatmodus / Quota */}}
+const COLLAPSE_KEY='dw:collapse';
+function autosave(){try{localStorage.setItem(AUTOSAVE_KEY,JSON.stringify(projectData()));}catch(e){/* Privatmodus / Quota */}}
 function getLocalProjects(){try{return JSON.parse(localStorage.getItem(PROJECTS_KEY)||'{}');}catch(e){return {};}}
 function refreshLocalProjects(){
   const sel=document.getElementById('projSel');const ps=getLocalProjects();const names=Object.keys(ps).sort();
@@ -518,7 +706,7 @@ function saveLocalProject(){
   const ps=getLocalProjects();
   if(ps[name] && !confirm(`„${name}“ überschreiben?`))return;
   ps[name]=projectData();
-  try{localStorage.setItem(PROJECTS_KEY,JSON.stringify(ps));}catch(e){alert('Konnte nicht speichern (Speicher voll oder Privatmodus?).');return;}
+  try{localStorage.setItem(PROJECTS_KEY,JSON.stringify(ps));}catch(e){alert('Konnte nicht speichern (Speicher voll – evtl. zu viele/große Bilder, oder Privatmodus).');return;}
   refreshLocalProjects();document.getElementById('projSel').value=name;flash('Projekt gespeichert ✓');
 }
 function loadLocalProject(){
@@ -532,6 +720,16 @@ function deleteLocalProject(){
   if(!confirm(`„${name}“ wirklich löschen?`))return;
   const ps=getLocalProjects();delete ps[name];
   localStorage.setItem(PROJECTS_KEY,JSON.stringify(ps));refreshLocalProjects();flash('Projekt gelöscht');
+}
+function initCollapsible(){
+  let saved={};try{saved=JSON.parse(localStorage.getItem(COLLAPSE_KEY)||'{}');}catch(e){}
+  document.querySelectorAll('details.group').forEach(d=>{
+    if(d.id && d.id in saved) d.open=saved[d.id];
+    d.addEventListener('toggle',()=>{
+      let s={};try{s=JSON.parse(localStorage.getItem(COLLAPSE_KEY)||'{}');}catch(e){}
+      s[d.id]=d.open;try{localStorage.setItem(COLLAPSE_KEY,JSON.stringify(s));}catch(e){}
+    });
+  });
 }
 
 // ============ TEMPLATES ============
@@ -552,9 +750,19 @@ function loadTemplate(){
 }
 
 // ============ EXPORT ============
+function preloadAll(){
+  const urls=[];
+  state.slides.forEach(s=>{if(s.illo)urls.push(s.illo);});
+  return Promise.all(urls.map(u=>new Promise(res=>{
+    const im=imgCache.get(u);
+    if(im && im.complete && im.naturalWidth) return res();
+    const i=new Image();i.onload=i.onerror=()=>{imgCache.set(u,i);res();};i.src=u;
+  })));
+}
 function exportCurrent(){
   render();
   canvas.toBlob(b=>{
+    if(!b){flash('Export fehlgeschlagen');return;}
     const a=document.createElement('a');
     a.download=`dw-slide-${state.active+1}.png`;
     a.href=URL.createObjectURL(b);a.click();
@@ -565,11 +773,11 @@ function canvasBlob(){return new Promise(res=>canvas.toBlob(res,'image/png'));}
 async function exportAll(){
   const prev=state.active;
   flash('Exportiere alle Slides…');
-  // collect a PNG blob per slide
+  await preloadAll();
   const blobs=[];
   for(let i=0;i<state.slides.length;i++){
     state.active=i;render();
-    await new Promise(r=>requestAnimationFrame(r)); // let the frame paint
+    await new Promise(r=>requestAnimationFrame(r));
     blobs.push(await canvasBlob());
   }
   state.active=prev;renderTabs();renderFields();render();
@@ -584,7 +792,6 @@ async function exportAll(){
     setTimeout(()=>URL.revokeObjectURL(a.href),3000);
     flash(`${blobs.length} Slides als ZIP exportiert ✓`);
   } else {
-    // fallback: sequential single downloads
     for(let i=0;i<blobs.length;i++){
       const a=document.createElement('a');
       a.download=`dw-slide-${i+1}.png`;
@@ -606,22 +813,24 @@ function applyProject(d){
     throw new Error('Kein gültiges Projekt (es fehlt "slides").');
   Object.assign(state,d);state.active=0;
   state.caption=d.caption||'';
+  state.style=d.style||'style1';
+  state.showScribbles=d.showScribbles!==false;
   fontSel.value=state.font;fsR.value=state.fontSize;fsOut.value=state.fontSize;
   lhR.value=state.lineH;lhOut.value=(+state.lineH).toFixed(2);
   document.getElementById('showBar').checked=!!state.showBar;
   document.getElementById('showSwipe').checked=!!state.showSwipe;
   document.getElementById('showQ').checked=!!state.showQ;
   document.getElementById('caption').value=state.caption;
-  // rebuild embedded images (logo/photo) so they survive save/load/paste
   state.photo=null;state.logo=null;
   if(d.photoData){const im=new Image();im.onload=()=>render();im.src=d.photoData;state.photo=im;}
   if(d.logoData){const im=new Image();im.onload=()=>render();im.src=d.logoData;state.logo=im;}
-  setLogoStatus();
+  setLogoStatus();syncStyleUI();
   renderTabs();renderFields();render();
 }
 function projectData(){
   return {font:state.font,fontSize:state.fontSize,lineH:state.lineH,
     showBar:state.showBar,showSwipe:state.showSwipe,showQ:state.showQ,
+    style:state.style||'style1',showScribbles:state.showScribbles!==false,
     caption:state.caption||'',slides:state.slides,
     photoData:state.photoData||null,logoData:state.logoData||null};
 }
@@ -651,15 +860,14 @@ function flash(msg){const m=document.getElementById('meta');const old=m.textCont
 function boot(){
   populateTemplates();
   refreshLocalProjects();
-  // letzte Sitzung wiederherstellen, sonst erste Vorlage laden
+  initCollapsible();
   const saved=localStorage.getItem(AUTOSAVE_KEY);
   if(saved){
-    try{applyProject(JSON.parse(saved));return;}catch(e){/* fällt unten auf Vorlage zurück */}
+    try{applyProject(JSON.parse(saved));return;}catch(e){/* fällt auf Vorlage zurück */}
   }
   if(window.DW_TEMPLATES&&window.DW_TEMPLATES.length){applyTemplate(0);}
-  else{state.slides=[defaultSlide('content')];renderTabs();renderFields();render();}
+  else{state.slides=[defaultSlide('content')];syncStyleUI();renderTabs();renderFields();render();}
 }
-// ensure fonts are ready before first paint
 if(document.fonts && document.fonts.ready){
   document.fonts.load("500 56px 'Cormorant Garamond'").then(()=>{});
   document.fonts.ready.then(()=>render());

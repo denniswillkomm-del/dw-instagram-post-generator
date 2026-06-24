@@ -91,5 +91,29 @@ window.DW_TEMPLATES = [
         { type: "cta", text: "Welche der drei\nStimmen\nwar gerade *deine*?\n\nUnd welche\nmöchtest du\nöfter hören?", footer: "Es gibt eine Art zu wachsen,\nüber die kaum jemand spricht. Folge mir." }
       ]
     }
+  },
+  {
+    id: "stil2-orientierung",
+    name: "Stil 2 · „Orientierung / VUCA“ (Scribble)",
+    description: "Style-2-Variante mit Scribble-Hintergrund. Illustrationen pro Slide selbst hochladen.",
+    project: {
+      font: "'Cormorant Garamond', serif",
+      fontSize: 56,
+      lineH: 1.34,
+      showBar: true, showSwipe: true, showQ: false,
+      style: "style2", showScribbles: true,
+      caption: "Manchmal trägt die gewohnte Orientierung nicht mehr – zu vieles gleichzeitig wahr, zu vieles in Bewegung.\n\nMehr Information hilft dann nicht. Was fehlt, ist Orientierung.\n\nIch mache Muster sichtbar, wo erst mal nur Durcheinander ist – und halte den Übergang aus zwischen dem, was nicht mehr gilt, und dem, was noch keine Form hat.\n\n#VUCA #Orientierung #vertikaleEntwicklung #Muster",
+      slides: [
+        { type: "content", text: "Manchmal trägt die\n*gewohnte* Orientierung\nnicht mehr." },
+        { type: "content", text: "Zu vieles\n*gleichzeitig* wahr.\nZu vieles\nin Bewegung." },
+        { type: "content", text: "Mehr Information\nhilft dann nicht.\nWas fehlt,\nist *Orientierung*." },
+        { type: "intro", heading: "", text: "Genau *da*\narbeite ich." },
+        { type: "content", text: "Ich mache\n*Muster* sichtbar,\nwo erst mal nur\nDurcheinander ist." },
+        { type: "content", text: "Ich halte den\n*Übergang* aus…\n\n… zwischen dem, was\nnicht mehr gilt und dem,\nwas noch keine Form hat." },
+        { type: "intro", heading: "Ich bin *Dennis*", text: "Ich arbeite mit Menschen an\nden Stellen, an denen ein\nProblem keine bessere\nLösung mehr verlangt…\n\n… sondern eine andere\nSicht auf sich selbst." },
+        { type: "content", text: "2021 habe ich eine\nKarte gezeichnet:\n*„Roadmap durch die VUCA-Welt“*\nSie trägt bis heute…\n\n… hier gehe ich den Schritt\nweiter, als sie reicht." },
+        { type: "cta", text: "Hier denke ich weiter.\nNicht fertig\nsondern *unterwegs*.", footer: "Folge mir für mehr Gedanken über Muster,\nEntwicklung und neue Sichtweisen." }
+      ]
+    }
   }
 ];

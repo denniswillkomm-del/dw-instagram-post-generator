@@ -31,6 +31,14 @@ Elegante Serife. Im Generator wählbar: **Cormorant Garamond** (Standard), EB Ga
 - **Profil-Slide**: Überschrift „Ich bin *Dennis*", Fließtext, Hexagon-Foto unten links.
 - **Abschluss-Slide**: Frage als Haupttext, DW-Hexagon-Logo + Footer-Zeile unten, optional Fragezeichen-Deko oben.
 
+## Stile
+Im Generator wählbar (Gruppe „Design-Stil“):
+
+- **Stil 1 · Klar** – der Standard: ruhiger Indigo-Hintergrund, Verlauf-Balken, Highlight-Wörter, Swipe-Pill, mittig gesetzter Text.
+- **Stil 2 · Scribble** – wie Stil 1, zusätzlich eine handgezeichnete Hintergrund-Textur (an/aus schaltbar) und pro Slide eine optionale **Illustration** unten (im „Slide-Inhalt“ hochladen). Der Text rückt dafür nach oben.
+
+Der Stil wird mit dem Projekt gespeichert. Auto-Fit: Die eingestellte Schriftgröße ist ein Maximum – passt der Text nicht, verkleinert er sich automatisch, statt aus dem Bild zu laufen.
+
 ## Aufbau eines Karussells (Standard)
 1.–5. **Inhalt** – kurze, pointierte Gedanken, je ein Highlight-Wort
 6. **Profil** – „Ich bin Dennis", was du tust
